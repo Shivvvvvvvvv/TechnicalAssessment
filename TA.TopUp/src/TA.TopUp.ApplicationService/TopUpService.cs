@@ -76,13 +76,13 @@ namespace TA.TopUp.ApplicationService
                                                                 x.CreatedAt
                                                             });
                     //Total transaction per month
-                    decimal? totalTransactionPerMonth = topUpTransactionPer.Sum(y => y.Amount);
+                    decimal? totalTransactionPerMonth = topUpTransactionPer.Sum(y => y.Amount) + request.Amount;
 
                     //Total Transaction per month based on beneficiary
-                    decimal? totalTransactionPerBeneficiary = topUpTransactionPer.Where(x=>x.BeneficiaryId == beneficiary.Uid).Sum(y => y.Amount);
+                    decimal? totalTransactionPerBeneficiary = topUpTransactionPer.Where(x=>x.BeneficiaryId == beneficiary.Uid).Sum(y => y.Amount) + request.Amount;
 
                     //Validating - Refactor below method
-                    if(totalTransactionPerMonth < maxTopUpAmountPerMonth && totalTransactionPerBeneficiary < maxBeneficiaryAmountPerMonth)
+                    if(totalTransactionPerMonth <= maxTopUpAmountPerMonth && totalTransactionPerBeneficiary <= maxBeneficiaryAmountPerMonth && maxBeneficiaryAmountPerMonth >= request.Amount)
                     {
                         //Check topup amount
                         var verifyTopUpOption = (await _unitOfWork.TopUpOptionsRepository.GetAsync(x => x.Amount == request.Amount)).FirstOrDefault();
@@ -99,7 +99,7 @@ namespace TA.TopUp.ApplicationService
 
                             //Checking enough balance
                             decimal totalDebit = request.Amount + _beneficiariesTopUpValidation.TopUpCharge;
-                            if (totalDebit >= topUpBalance)
+                            if (totalDebit <= topUpBalance)
                             {
                                 //Debit from wallet balance
                                 UserWalletBalance userWalletBalance = new UserWalletBalance();
@@ -119,13 +119,13 @@ namespace TA.TopUp.ApplicationService
 
                                 //Insert into transaction table
                                 UserTransaction userTransactionCharge = new UserTransaction();
-                                userTransaction.UserId = userId;
-                                userTransaction.BeneficiaryId = request.BeneficiaryId;
-                                userTransaction.Amount = _beneficiariesTopUpValidation.TopUpCharge;
-                                userTransaction.TransactionType = "Debit";
-                                userTransaction.CurrencyId = 1;
-                                userTransaction.CreatedAt = DateTime.UtcNow;
-                                userTransaction.CreatedBy = userId.ToString();
+                                userTransactionCharge.UserId = userId;
+                                userTransactionCharge.BeneficiaryId = request.BeneficiaryId;
+                                userTransactionCharge.Amount = _beneficiariesTopUpValidation.TopUpCharge;
+                                userTransactionCharge.TransactionType = "Debit";
+                                userTransactionCharge.CurrencyId = 1;
+                                userTransactionCharge.CreatedAt = DateTime.UtcNow;
+                                userTransactionCharge.CreatedBy = userId.ToString();
 
                                 _unitOfWork.UserTransactionsRepository.Insert(userTransactionCharge);
 

@@ -82,8 +82,16 @@ namespace TA.TopUp.ApplicationService
                 {
                     _logger.LogInformation("Creating Beneficiary");
                     var beneficiaryCount = (await _unitOfWork.BeneficiaryRepository.GetAsync(x => x.UserId == userId && x.IsActive == true)).Count();
+
+                    var existingBeneficiary = (await _unitOfWork.BeneficiaryRepository.GetAsync(x => x.NickName == saveBeneficiaryRequest.NickName || x.MobileNumber ==saveBeneficiaryRequest.MobileNumber && x.IsActive == true)).Count();
+                    if(existingBeneficiary >0)
+                    {
+                        string message = "Beneficiary exist";
+                        response.IsSuccess = false;
+                        response.Message = message;
+                    }
                     //Checking maximum beneficiary per user
-                    if (beneficiaryCount > _beneficiariesTopUpValidation.MaxBeneficiaryPerUser)
+                    else if (beneficiaryCount >= _beneficiariesTopUpValidation.MaxBeneficiaryPerUser)
                     {
                         string message = "Exceeded maximum beneficiary per user";
                         response.IsSuccess = false;
