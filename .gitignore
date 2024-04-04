@@ -396,3 +396,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/TA.TopUp/src/TA.TopUp.API/TA.TopUp.API.csproj.bak
+/TA.TopUp/src/TA.TopUp.ApplicationService/TA.TopUp.ApplicationService.csproj.bak
+/TA.TopUp/src/TA.Wallet.API/TA.Wallet.API.csproj.bak
