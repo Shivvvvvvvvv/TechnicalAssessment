@@ -4,11 +4,15 @@ Created a robust backend solution for the topup beneficiary application, enablin
 
 
 ## Table of Contents
-* [Prerequisites](#Prerequisites)
-* [Architecture Overview](#Architecture-Overview)
-* [Instructions](#Instructions)
-* [Contributions](#Contributions)
-* [Credits](#Credits)
+- [TopUp Beneficiary Solution - NET6](#topup-beneficiary-solution---net6)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Architecture Overview](#architecture-overview)
+  - [Instructions](#instructions)
+    - [Installation:](#installation)
+    - [Database Setup](#database-setup)
+  - [Third Party Libraries](#third-party-libraries)
+  - [Future Enhancements](#future-enhancements)
 
 
 ## Prerequisites
@@ -35,7 +39,8 @@ This is a multi-project solution that utilizes Domain Driven Design (DDD) and CQ
 5. Rebuild and run the program by setting below projects as startup,
    ![alt text](image.png) 
 
-You should be able to browse to the application by using the below URL :
+
+You should be able to browse and test the application api by using the below URL :
 
 ```
 Swagger - TopUp Service: https://localhost:7024/swagger/index.html
@@ -46,12 +51,10 @@ Swagger - Wallet Service: https://localhost:7085/swagger/index.html
 ### Database Setup
 To setup the SQL Server database following the instructions below:
 1. Reveiw the **connection string** in **appsettings.json** and update the database name.
-2. Run `dotnet ef migrations add Initial --context <ProjectName>DbContext` to add migation with EF Core 
-3. Run `dotnet ef database update Initial` to create application database.
-
+2. Execute the Script uploaded in below path
+   ./Script/ScriptWithMasterData.sql
 
 ## Third Party Libraries
-* Swagger
 * Serilog
 
 ## Future Enhancements
