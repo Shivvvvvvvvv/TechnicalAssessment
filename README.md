@@ -24,7 +24,7 @@ You will need the following tools:
 
 
 ## Architecture Overview
-This is a multi-project solution that utilizes Domain Driven Design (DDD) and CQRS patterns to create a maintainable web API application using .NET 6 that allows it to run on Linux or Windows and in Docker environments.
+This is a multi-project solution that utilizes Domain Driven Design (DDD) to create a maintainable web API application using .NET 6 that allows it to run on Linux or Windows and in Docker environments.
 
 ## Instructions
 ### Installation:
@@ -50,7 +50,7 @@ Swagger - Wallet Service: https://localhost:7085/swagger/index.html
 
 ### Database Setup
 To setup the SQL Server database following the instructions below:
-1. Reveiw the **connection string** in **appsettings.json** and update the database name.
+1. Reveiw the **connection string** in **appsettings.json** and update.
 2. Execute the Script uploaded in below path
    ./Script/ScriptWithMasterData.sql
 
