@@ -50,7 +50,11 @@ Swagger - Wallet Service: https://localhost:7085/swagger/index.html
 
 ### Database Setup
 To setup the SQL Server database following the instructions below:
-1. Reveiw the **connection string** in **appsettings.json** and update.
+1. Reveiw the **connection string** in **appsettings.json** in below projects and update.
+   ```
+    ..\TA.TopUp.API\appsettings.json
+    ..\TA.Wallet.API\appsettings.json
+   ```
 2. Execute the Script uploaded in below path
    ./Script/ScriptWithMasterData.sql
 
