@@ -16,7 +16,7 @@ namespace TA.TopUp.ApplicationService
         private readonly IUnitOfWork _unitOfWork;
         private readonly BeneficiariesTopUpValidation _beneficiariesTopUpValidation;
         private readonly WalletService _walletService;
-        public TopUpService(WalletService walletService, ILogger<TopUpService> logger, IUnitOfWork unitOfWork, IOptionsMonitor<BeneficiariesTopUpValidation> beneficiariesTopUpValidation) 
+        public TopUpService(WalletService walletService, ILogger<TopUpService> logger, IUnitOfWork unitOfWork, IOptionsMonitor<BeneficiariesTopUpValidation> beneficiariesTopUpValidation)
         {
             _walletService = walletService;
             _logger = logger;
@@ -26,14 +26,16 @@ namespace TA.TopUp.ApplicationService
 
         private static UserTransaction InsertUserTransaction(int userId, TopUpBeneficiaryRequest request)
         {
-            UserTransaction userTransaction = new UserTransaction();
-            userTransaction.UserId = userId;
-            userTransaction.BeneficiaryId = request.BeneficiaryId;
-            userTransaction.Amount = request.Amount;
-            userTransaction.TransactionType = "Debit";
-            userTransaction.CurrencyId = 1;
-            userTransaction.CreatedAt = DateTime.UtcNow;
-            userTransaction.CreatedBy = userId.ToString();
+            UserTransaction userTransaction = new UserTransaction
+            {
+                UserId = userId,
+                BeneficiaryId = request.BeneficiaryId,
+                Amount = request.Amount,
+                TransactionType = "Debit",
+                CurrencyId = 1,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = userId.ToString()
+            };
             return userTransaction;
         }
         public async Task<IEnumerable<TopUpOptionResponse>> GetTopUpOptions(int userId)
@@ -52,7 +54,7 @@ namespace TA.TopUp.ApplicationService
             TopUpResponse topUpResponse = new TopUpResponse();
             try
             {
-                var beneficiary = (await _unitOfWork.BeneficiaryRepository.GetAsync(x => x.UserId == userId && x.Uid == request.BeneficiaryId, y=> y.User )).FirstOrDefault();
+                var beneficiary = (await _unitOfWork.BeneficiaryRepository.GetAsync(x => x.UserId == userId && x.Uid == request.BeneficiaryId, y => y.User)).FirstOrDefault();
                 if (beneficiary != null)
                 {
                     //maximum beneficiary amount
@@ -67,49 +69,35 @@ namespace TA.TopUp.ApplicationService
                     var endDate = startDate.AddMonths(1).AddDays(-1);
 
                     //Reading permonth total topup based on beneficiary
-                    var topUpTransactionPer = (await _unitOfWork.UserTransactionsRepository.GetAsync(x => x.TransactionType =="Debit" && x.CreatedAt >= startDate && x.CreatedAt <= endDate && x.UserId == userId)).Select(x => new
-                                                            {
-                                                                x.UserId,
-                                                                x.Uid,
-                                                                x.Amount,
-                                                                x.BeneficiaryId,
-                                                                x.CreatedAt
-                                                            });
+                    var topUpTransactionPer = (await _unitOfWork.UserTransactionsRepository.GetAsync(x => x.TransactionType == "Debit" && x.CreatedAt >= startDate && x.CreatedAt <= endDate && x.UserId == userId)).ToList();
+
                     //Total transaction per month
                     decimal? totalTransactionPerMonth = topUpTransactionPer.Sum(y => y.Amount) + request.Amount;
 
                     //Total Transaction per month based on beneficiary
-                    decimal? totalTransactionPerBeneficiary = topUpTransactionPer.Where(x=>x.BeneficiaryId == beneficiary.Uid).Sum(y => y.Amount) + request.Amount;
+                    decimal? totalTransactionPerBeneficiary = topUpTransactionPer.Where(x => x.BeneficiaryId == beneficiary.Uid).Sum(y => y.Amount) + request.Amount;
 
                     //Validating - Refactor below method
-                    if(totalTransactionPerMonth <= maxTopUpAmountPerMonth && totalTransactionPerBeneficiary <= maxBeneficiaryAmountPerMonth && maxBeneficiaryAmountPerMonth >= request.Amount)
+                    if (totalTransactionPerMonth <= maxTopUpAmountPerMonth && totalTransactionPerBeneficiary <= maxBeneficiaryAmountPerMonth && maxBeneficiaryAmountPerMonth >= request.Amount)
                     {
                         //Check topup amount
                         var verifyTopUpOption = (await _unitOfWork.TopUpOptionsRepository.GetAsync(x => x.Amount == request.Amount)).FirstOrDefault();
 
                         //Refract below methos
-                        if(verifyTopUpOption != null)
+                        if (verifyTopUpOption != null)
                         {
-
-
                             var walletBalance = await _walletService.GetWalletBalance(userId);
                             //user Balance
                             decimal? topUpBalance = walletBalance.Amount;
                             long walletId = walletBalance.WalletId;
 
                             //Checking enough balance
-                            decimal totalDebit = request.Amount + _beneficiariesTopUpValidation.TopUpCharge;
+                            decimal? totalDebit = request.Amount + _beneficiariesTopUpValidation.TopUpCharge;
                             if (totalDebit <= topUpBalance)
                             {
                                 //Debit from wallet balance
-                                UserWalletBalance userWalletBalance = new UserWalletBalance();
-                                userWalletBalance.Uid = walletId;
-                                userWalletBalance.UserId = userId;
-                                userWalletBalance.Balance = topUpBalance - totalDebit;
-                                userWalletBalance.CurrencyId = 1;
-
-                                userWalletBalance.LastUpdatedAt = DateTime.UtcNow;
-                                userWalletBalance.LastUpdatedBy = userId.ToString();
+                                decimal? newBalance = topUpBalance - totalDebit;
+                                UserWalletBalance userWalletBalance = UpdateUserWalletBalance(userId,  newBalance , walletId);
 
                                 _unitOfWork.UserWalletBalancesRepository.Update(userWalletBalance);
 
@@ -118,14 +106,7 @@ namespace TA.TopUp.ApplicationService
                                 _unitOfWork.UserTransactionsRepository.Insert(userTransaction);
 
                                 //Insert into transaction table
-                                UserTransaction userTransactionCharge = new UserTransaction();
-                                userTransactionCharge.UserId = userId;
-                                userTransactionCharge.BeneficiaryId = request.BeneficiaryId;
-                                userTransactionCharge.Amount = _beneficiariesTopUpValidation.TopUpCharge;
-                                userTransactionCharge.TransactionType = "Debit";
-                                userTransactionCharge.CurrencyId = 1;
-                                userTransactionCharge.CreatedAt = DateTime.UtcNow;
-                                userTransactionCharge.CreatedBy = userId.ToString();
+                                UserTransaction userTransactionCharge = InsertUserTransaction(userId, new TopUpBeneficiaryRequest { BeneficiaryId = request.BeneficiaryId, Amount = _beneficiariesTopUpValidation.TopUpCharge });
 
                                 _unitOfWork.UserTransactionsRepository.Insert(userTransactionCharge);
 
@@ -137,19 +118,12 @@ namespace TA.TopUp.ApplicationService
                                 topUpResponse.IsSuccess = false;
                                 topUpResponse.Message = "Insufficient balance";
                             }
-
-                            
-
                         }
                         else
                         {
                             topUpResponse.IsSuccess = false;
                             topUpResponse.Message = "Invalid topup amount";
                         }
-
-
-
-
                     }
                     else
                     {
@@ -175,6 +149,19 @@ namespace TA.TopUp.ApplicationService
             return topUpResponse;
         }
 
-
+        private static UserWalletBalance UpdateUserWalletBalance(int userId, decimal? newBalance, long walletId)
+        {
+            UserWalletBalance userWalletBalance = new UserWalletBalance
+            {
+                Uid = walletId,
+                UserId = userId,
+                Balance = newBalance,
+                CurrencyId = 1,                
+                LastUpdatedAt = DateTime.UtcNow,
+                LastUpdatedBy = userId.ToString()
+        };
+            
+            return userWalletBalance;
+        }
     }
 }

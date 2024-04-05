@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TA.TopUp.Shared.DTOs.Request
+﻿namespace TA.TopUp.Shared.DTOs.Request
 {
     public class TopUpBeneficiaryRequest
     {

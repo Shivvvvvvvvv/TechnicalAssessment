@@ -1,5 +1,4 @@
-﻿using TA.TopUp.Core.Interfaces.Repositories;
-using TA.TopUp.Infrastructure.DataAccessAbstractions;
+﻿using TA.TopUp.Infrastructure.DataAccessAbstractions;
 using TA.Wallet.API.Interfaces;
 using TA.Wallet.API.Models;
 

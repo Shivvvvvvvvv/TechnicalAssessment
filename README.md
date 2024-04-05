@@ -54,6 +54,19 @@ To setup the SQL Server database following the instructions below:
 2. Execute the Script uploaded in below path
    ./Script/ScriptWithMasterData.sql
 
+   Master Data  to test
+   #User Table
+   ![alt text](image-2.png)
+
+   #Wallet Balance
+   ![alt text](image-3.png)
+
+   #Beneficiary
+   ![alt text](image-4.png)
+
+```#Sample request data added above each api. Kindly check in the controller.```
+
+ 
 ## Third Party Libraries
 * Serilog
 

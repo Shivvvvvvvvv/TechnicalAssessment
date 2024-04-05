@@ -18,6 +18,17 @@ namespace TA.TopUp.API.Controllers
 
         }
 
+        /// <summary>
+        /// Top up options.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     Header:
+        ///         userId = 1
+        ///
+        /// </remarks>
+        /// <param name="request">Top up option request data.</param>
         [HttpGet("options")]
         public async Task<IResult> FetchTopUpOptions([FromHeader(Name = "UserId")] int userId)
         {
@@ -26,7 +37,25 @@ namespace TA.TopUp.API.Controllers
             return Results.Ok(result);
         }
 
-        [HttpPost("topup-beneficiary")]
+        /// <summary>
+        /// Top up beneficiary.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     Header:
+        ///         userId = 1
+        ///
+        ///     POST /topup/topup-beneficiary
+        ///     {
+        ///          "amount": 5,
+        ///          "beneficiaryId": 2,
+        ///          "currency": "AED"
+    ///         }
+    ///
+    /// </remarks>
+    /// <param name="request">Top up  request data.</param>
+    [HttpPost("topup-beneficiary")]
         public async Task<IResult> TopUpBeneficiary([FromHeader(Name = "UserId")] int userId, TopUpBeneficiaryRequest req)
         {
             _log.LogInformation("Fetch TopUp Options");

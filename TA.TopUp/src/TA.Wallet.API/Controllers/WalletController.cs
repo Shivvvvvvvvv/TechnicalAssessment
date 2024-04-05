@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TA.TopUp.Core.Interfaces.Repositories;
 using TA.Wallet.API.Interfaces;
-using TA.Wallet.API.Models;
 
 namespace TA.Wallet.API.Controllers
 {

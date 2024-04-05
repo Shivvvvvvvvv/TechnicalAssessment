@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TA.TopUp.Core.Interfaces.Repositories;
-using TA.TopUp.Core.Interfaces.Services;
+﻿using TA.TopUp.Core.Interfaces.Repositories;
 
 namespace TA.TopUp.Infrastructure.DataAccessAbstractions
 {
